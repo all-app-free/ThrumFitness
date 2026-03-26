@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thrum Fitness</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: rgba(25, 25, 25, 0.7);
+            --neon-green: #2ecc71;
+            --thrum-red: #e74c3c;
+            --glass: rgba(255, 255, 255, 0.05);
+            --text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden; /* App-like feel */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Layout */
+        header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lvl-badge {
+            background: linear-gradient(45deg, var(--thrum-red), #c0392b);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 100px 20px;
+        }
+
+        /* Progress Bar */
+        .xp-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        #xp-progress {
+            width: 30%;
+            height: 100%;
+            background: var(--neon-green);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        /* Modules */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: block;
+            color: var(--neon-green);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--glass);
+            border: 1px solid var(--neon-green);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: var(--neon-green);
+            color: black;
+        }
+
+        .btn-red { border-color: var(--thrum-red); }
+        .btn-red:active { background: var(--thrum-red); color: white; }
+
+        /* AI Coach Box */
+        .ai-box {
+            border-left: 4px solid var(--thrum-red);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        /* Flash Effect */
+        #flash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 9999;
+            display: none;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--glass);
+        }
+
+        nav i { font-size: 1.5rem; color: #555; }
+        nav i.active { color: var(--neon-green); }
+
+        /* Splash Screen */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="flash-overlay"></div>
+
+    <div id="splash">
+        <h1 style="color: var(--thrum-red); font-size: 3rem; margin-bottom: 0;">THRUM</h1>
+        <p style="letter-spacing: 4px; opacity: 0.5;">LUVYX EDITION</p>
+        <button class="btn" onclick="initApp()" style="width: 200px; margin-top: 50px;">VSTOUPIT</button>
+    </div>
+
+    <header>
+        <div>
+            <span class="stat-label">Vítejte v zóně</span>
+            <div style="font-size: 1.2rem; font-weight: bold;">User_Alpha</div>
+        </div>
+        <div class="lvl-badge">LVL <span id="lvl-num">1</span></div>
+    </header>
+
+    <main>
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                <span>Luvyx XP Progress</span>
+                <span id="xp-text">300 / 1000</span>
+            </div>
+            <div class="xp-bar-container"><div id="xp-progress"></div></div>
+        </div>
+
+        <div class="grid">
+            <div class="glass-card">
+                <span class="stat-label">Kroky</span>
+                <span id="step-count" class="stat-val">0</span>
+            </div>
+            <div class="glass-card">
+                <span class="stat-label">Kalorie</span>
+                <span id="cal-count" class="stat-val">0</span>
+            </div>
+        </div>
+
+        <div class="glass-card ai-box" id="ai-coach">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <i class="fas fa-robot" style="margin-right: 10px; color: var(--thrum-red);"></i>
+                <span style="font-weight: bold;">Thrum AI Coach</span>
+            </div>
+            <p id="ai-text" style="font-size: 0.9rem; min-height: 40px;">Připraven na trénink? Klepni pro výzvu.</p>
+            <button class="btn" onclick="generateChallenge()" style="padding: 5px; font-size: 0.8rem;">GENEROVAT VÝZVU</button>
+        </div>
+
+        <div class="glass-card" style="text-align: center;">
+            <span class="stat-label">HIIT Časovač</span>
+            <div id="timer-display" style="font-size: 3rem; font-weight: 800; margin: 10px 0;">00:00</div>
+            <div class="grid">
+                <button class="btn" id="timer-btn" onclick="toggleTimer()">START</button>
+                <button class="btn btn-red" onclick="resetTimer()">RESET</button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="glass-card" style="text-align: center;">
+                <span class="stat-label">Hydratace</span>
+                <div style="font-size: 1.5rem; margin: 10px 0;"><i class="fas fa-tint" style="color: #3498db;"></i> <span id="water-count">0</span></div>
+                <button class="btn" onclick="addWater()" style="padding: 5px;">+250ml</button>
+            </div>
+            <div class="glass-card" style="text-align: center;">
+                <span class="stat-label">Váha (kg)</span>
+                <input type="number" id="weight-input" style="background: transparent; border: none; color: white; text-align: center; font-size: 1.5rem; width: 100%; margin: 10px 0;" placeholder="0.0" onchange="saveWeight()">
+                <button class="btn btn-red" onclick="exportData()" style="padding: 5px; font-size: 0.7rem;">REPORT</button>
+            </div>
+        </div>
+    </main>
+
+    <nav>
+        <i class="fas fa-home active"></i>
+        <i class="fas fa-chart-line"></i>
+        <i class="fas fa-fire"></i>
+        <i class="fas fa-user-cog"></i>
+    </nav>
+
+    <script>
+        // --- DATA STATE ---
+        let state = {
+            steps: 0,
+            water: 0,
+            weight: localStorage.getItem('thrum_weight') || 0,
+            xp: parseInt(localStorage.getItem('thrum_xp')) || 0,
+            lvl: 1
+        };
+
+        // --- CORE APP INIT ---
+        function initApp() {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('weight-input').value = state.weight;
+            updateXP(0);
+            initPedometer();
+            hapticFeedback(50);
+        }
+
+        // --- PEDOMETER (ACCELEROMETER) ---
+        let lastAmt = 0;
+        let stepThreshold = 12; 
+
+        function initPedometer() {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission().then(response => {
+                    if (response == 'granted') window.addEventListener('devicemotion', handleMotion);
+                });
+            } else {
+                window.addEventListener('devicemotion', handleMotion);
+            }
+        }
+
+        function handleMotion(event) {
+            let acc = event.accelerationIncludingGravity;
+            let totalAcc = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
+            
+            if (totalAcc > stepThreshold && (Date.now() - lastAmt > 300)) {
+                state.steps++;
+                lastAmt = Date.now();
+                updateUI();
+                if (state.steps % 10 === 0) updateXP(5);
+            }
+        }
+
+        // --- HIIT TIMER ---
+        let timerInterval;
+        let seconds = 0;
+        let isRunning = false;
+        const beep = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19v');
+
+        function toggleTimer() {
+            hapticFeedback(30);
+            if (isRunning) {
+                clearInterval(timerInterval);
+                document.getElementById('timer-btn').innerText = 'START';
+            } else {
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    updateTimerDisplay();
+                    if (seconds % 60 === 0) {
+                        beep.play();
+                        hapticFeedback([100, 50, 100]);
+                    }
+                }, 1000);
+                document.getElementById('timer-btn').innerText = 'PAUZA';
+            }
+            isRunning = !isRunning;
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            seconds = 0;
+            isRunning = false;
+            updateTimerDisplay();
+            document.getElementById('timer-btn').innerText = 'START';
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(seconds / 60);
+            let s = seconds % 60;
+            document.getElementById('timer-display').innerText = 
+                `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // --- WATER & WEIGHT ---
+        function addWater() {
+            state.water += 250;
+            updateUI();
+            hapticFeedback(20);
+            updateXP(2);
+            if (state.water >= 2000) celebration();
+        }
+
+        function saveWeight() {
+            state.weight = document.getElementById('weight-input').value;
+            localStorage.setItem('thrum_weight', state.weight);
+        }
+
+        // --- AI COACH ---
+        const challenges = [
+            "Dej si 20 angličáků právě teď!",
+            "Drž plank po dobu 60 sekund.",
+            "Vypij sklenici vody a udělej 10 dřepů.",
+            "Běž na 5 minutovou ostrou procházku.",
+            "Zkus 30 vteřin stínový box."
+        ];
+
+        function generateChallenge() {
+            hapticFeedback(40);
+            const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+            document.getElementById('ai-text').innerText = challenge;
+            
+            const utterance = new SpeechSynthesisUtterance(challenge);
+            utterance.lang = 'cs-CZ';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- GAMIFICATION ---
+        function updateXP(amount) {
+            state.xp += amount;
+            state.lvl = Math.floor(state.xp / 1000) + 1;
+            localStorage.setItem('thrum_xp', state.xp);
+            
+            let currentXP = state.xp % 1000;
+            document.getElementById('xp-progress').style.width = (currentXP / 10) + "%";
+            document.getElementById('xp-text').innerText = `${currentXP} / 1000 XP`;
+            document.getElementById('lvl-num').innerText = state.lvl;
+        }
+
+        // --- UTILS ---
+        function updateUI() {
+            document.getElementById('step-count').innerText = state.steps;
+            document.getElementById('cal-count').innerText = Math.floor(state.steps * 0.04);
+            document.getElementById('water-count').innerText = state.water + "ml";
+        }
+
+        function hapticFeedback(pattern) {
+            if ("vibrate" in navigator) navigator.vibrate(pattern);
+        }
+
+        function celebration() {
+            hapticFeedback([200, 100, 200]);
+            const flash = document.getElementById('flash-overlay');
+            flash.style.display = 'block';
+            setTimeout(() => flash.style.display = 'none', 100);
+            setTimeout(() => {
+                flash.style.display = 'block';
+                setTimeout(() => flash.style.display = 'none', 100);
+            }, 200);
+        }
+
+        function exportData() {
+            let report = `THRUM FITNESS REPORT\nDate: ${new Date().toLocaleDateString()}\nSteps: ${state.steps}\nWater: ${state.water}ml\nWeight: ${state.weight}kg\nXP: ${state.xp}`;
+            let blob = new Blob([report], {type: "text/plain"});
+            let anchor = document.createElement("a");
+            anchor.download = "thrum_report.txt";
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
+    </script>
+</body>
+</html>
+
