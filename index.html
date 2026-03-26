@@ -7,385 +7,365 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card-bg: rgba(25, 25, 25, 0.7);
+            --bg: #070707;
+            --card-bg: rgba(20, 20, 20, 0.85);
             --neon-green: #2ecc71;
             --thrum-red: #e74c3c;
             --glass: rgba(255, 255, 255, 0.05);
             --text: #ffffff;
+            --accent-blue: #3498db;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Roboto, sans-serif; }
-
-        body {
-            margin: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', -apple-system, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
         /* --- NAVIGATION --- */
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: calc(85px + env(safe-area-inset-bottom));
-            background: rgba(10, 10, 10, 0.98);
-            border-top: 1px solid var(--glass);
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-start;
-            padding-top: 15px;
-            z-index: 1000;
-            backdrop-filter: blur(20px);
+        nav { 
+            position: fixed; bottom: 0; width: 100%; 
+            height: calc(85px + env(safe-area-inset-bottom)); 
+            background: rgba(7, 7, 7, 0.98); border-top: 1px solid var(--glass); 
+            display: flex; justify-content: space-around; padding-top: 15px; z-index: 1000;
         }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.4; transition: 0.3s; }
+        .nav-item.active { opacity: 1; color: var(--neon-green); }
+        .nav-item i { font-size: 1.5rem; }
+        .nav-label { font-size: 0.65rem; margin-top: 6px; font-weight: 600; text-transform: uppercase; }
 
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            height: 50px;
-            transition: 0.3s;
-            pointer-events: auto;
-        }
-
-        .nav-item i { font-size: 1.6rem; color: #444; transition: 0.3s; }
-        .nav-item.active i { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
-        .nav-label { font-size: 0.6rem; margin-top: 4px; color: #444; text-transform: uppercase; }
-        .nav-item.active .nav-label { color: var(--neon-green); }
-
-        /* --- MAIN LAYOUT --- */
-        header { padding: 40px 25px 10px; display: flex; justify-content: space-between; align-items: center; }
-        
-        main {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 20px calc(110px + env(safe-area-inset-bottom)) 20px;
-        }
-
-        .page { display: none; animation: fadeIn 0.4s ease forwards; }
+        /* --- PAGES & LAYOUT --- */
+        main { flex: 1; overflow-y: auto; padding: 20px 20px 120px 20px; scroll-behavior: smooth; }
+        .page { display: none; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        header { padding: 50px 25px 10px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .lvl-badge { background: linear-gradient(135deg, var(--thrum-red), #c0392b); padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 900; box-shadow: 0 4px 15px rgba(231,76,60,0.3); }
 
-        /* --- UI COMPONENTS --- */
-        .glass-card { 
-            background: var(--card-bg); 
-            border: 1px solid var(--glass); 
-            border-radius: 24px; 
-            padding: 20px; 
-            margin-bottom: 15px; 
-            backdrop-filter: blur(10px);
-        }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-val { font-size: 2.2rem; font-weight: 900; color: var(--neon-green); display: block; line-height: 1; margin: 5px 0; }
-        .stat-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.5; letter-spacing: 1.2px; font-weight: bold; }
+        /* --- CARDS & UI --- */
+        .glass-card { background: var(--card-bg); border: 1px solid var(--glass); border-radius: 28px; padding: 22px; margin-bottom: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.5; letter-spacing: 1.5px; font-weight: 700; display: block; margin-bottom: 4px; }
+        .stat-val { font-size: 2.8rem; font-weight: 900; color: var(--neon-green); display: block; letter-spacing: -1px; }
         
-        .btn { 
-            background: var(--glass); 
-            border: 1px solid var(--neon-green); 
-            color: white; padding: 14px; 
-            border-radius: 14px; width: 100%; 
-            font-weight: bold; cursor: pointer; 
-            transition: 0.2s; outline: none;
-        }
-        .btn:active { background: var(--neon-green); color: black; transform: scale(0.96); }
+        .btn { background: var(--glass); border: 1px solid var(--neon-green); color: white; padding: 16px; border-radius: 18px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.2s; border: 1px solid var(--neon-green); }
+        .btn:active { transform: scale(0.96); background: var(--neon-green); color: black; }
         .btn-red { border-color: var(--thrum-red); }
         .btn-red:active { background: var(--thrum-red); color: white; }
 
-        input {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass);
-            border-radius: 12px;
-            color: white;
-            padding: 12px;
-            width: 100%;
-            font-size: 1rem;
-            outline: none;
-            text-align: center;
-        }
+        input, select { background: #151515; border: 1px solid #222; color: white; padding: 14px; border-radius: 14px; width: 100%; margin-top: 10px; font-size: 1rem; }
 
-        .lvl-badge { background: var(--thrum-red); padding: 5px 14px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 0 15px rgba(231, 76, 60, 0.3); }
-
-        #splash { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        
-        /* Flash effect */
-        #flash { position: fixed; inset: 0; background: white; z-index: 3000; display: none; pointer-events: none; }
+        /* --- ANIMATIONS --- */
+        .pulse { animation: pulseAnim 2s infinite; }
+        @keyframes pulseAnim { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #flash { position: fixed; inset: 0; background: white; z-index: 5000; display: none; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <div id="flash"></div>
 
-    <div id="splash">
-        <h1 style="color: var(--thrum-red); font-size: 3.5rem; margin: 0; letter-spacing: -2px;">THRUM</h1>
-        <p style="opacity: 0.4; letter-spacing: 5px; font-size: 0.7rem; margin-top: -5px;">LUVYX EDITION</p>
-        <button class="btn" onclick="initApp()" style="width: 220px; margin-top: 40px; border-radius: 30px;">VSTOUPIT DO ZÓNY</button>
+    <div id="splash" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+        <h1 style="font-size:4.5rem; color:var(--thrum-red); margin:0; letter-spacing:-3px;">THRUM</h1>
+        <p style="letter-spacing:8px; opacity:0.3; font-size:0.8rem; margin-top:-10px;">ULTIMATE EDITION</p>
+        <button class="btn" onclick="initApp()" style="width:220px; margin-top:60px; border-radius:50px; border: 2px solid var(--thrum-red);">INITIALIZE</button>
     </div>
 
     <header>
         <div>
-            <span class="stat-label">Vítejte v zóně</span>
-            <div style="font-size: 1.4rem; font-weight: 800;">User_Alpha</div>
+            <span id="greeting" class="stat-label">Dobré ráno</span>
+            <div id="display-name" style="font-size: 1.8rem; font-weight: 900;">User_Alpha</div>
         </div>
         <div class="lvl-badge">LVL <span id="lvl-num">1</span></div>
     </header>
 
     <main>
         <div id="home" class="page active">
-            <div class="grid">
-                <div class="glass-card">
-                    <span class="stat-label">Kroky</span>
-                    <span id="step-count" class="stat-val">0</span>
-                </div>
-                <div class="glass-card">
-                    <span class="stat-label">Kalorie</span>
-                    <span id="cal-count" class="stat-val">0</span>
+            <div class="glass-card" style="text-align: center; border-top: 4px solid var(--neon-green);">
+                <span class="stat-label">Steps Today</span>
+                <span id="step-count" class="stat-val">0</span>
+                <div style="font-size: 0.85rem; opacity: 0.6; margin-top: 5px;">
+                    <i class="fas fa-fire" style="color:#e67e22"></i> <span id="cal-count">0</span> kcal
                 </div>
             </div>
 
             <div class="glass-card" style="border-left: 5px solid var(--thrum-red);">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <i class="fas fa-robot" style="color: var(--thrum-red);"></i>
-                    <span style="font-weight: bold; text-transform: uppercase; font-size: 0.8rem;">Thrum AI Coach</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="stat-label">Thrum AI Coach</span>
+                    <i class="fas fa-robot" style="color:var(--thrum-red)"></i>
                 </div>
-                <p id="ai-text" style="margin: 0 0 15px 0; font-size: 1rem; line-height: 1.4; min-height: 45px;">Dnes je skvělý den na překonávání rekordů!</p>
-                <button class="btn" onclick="generateChallenge()" style="padding: 10px; font-size: 0.8rem;">GENEROVAT VÝZVU</button>
+                <p id="ai-text" style="font-weight: 500; font-size: 1.1rem; line-height: 1.4;">Jsi připraven na dnešní progres? Klepni pro výzvu.</p>
+                <button class="btn" onclick="generateChallenge()" style="padding:10px; font-size:0.75rem;">NEW CHALLENGE</button>
             </div>
 
-            <div class="glass-card" style="text-align: center;">
-                <span class="stat-label">HIIT Časovač</span>
-                <div id="timer-display" style="font-size: 4rem; font-weight: 900; margin: 10px 0; font-variant-numeric: tabular-nums;">00:00</div>
-                <div class="grid">
+            <div class="glass-card">
+                <span class="stat-label">HIIT Pro Timer</span>
+                <div id="timer-display" style="font-size:4.2rem; font-weight:900; text-align:center; margin:15px 0; font-variant-numeric: tabular-nums;">00:00.0</div>
+                <div class="grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <button class="btn" id="timer-btn" onclick="toggleTimer()">START</button>
                     <button class="btn btn-red" onclick="resetTimer()">RESET</button>
                 </div>
+                <div id="laps-container" style="margin-top:15px; font-size:0.8rem; opacity:0.5; max-height:60px; overflow-y:auto;"></div>
             </div>
         </div>
 
         <div id="stats" class="page">
-            <h2 style="margin-left: 5px;">Statistiky</h2>
+            <h2 style="font-weight:900; letter-spacing:-1px;">Performance Insights</h2>
             <div class="glass-card">
-                <span class="stat-label">Luvyx XP</span>
-                <span id="xp-stat" class="stat-val">0 XP</span>
-                <div style="height: 6px; background: #222; border-radius: 3px; margin-top: 10px;">
-                    <div id="xp-bar" style="width: 0%; height: 100%; background: var(--neon-green); border-radius: 3px; transition: 0.5s;"></div>
+                <span class="stat-label">Level Progress</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:bold; font-size:0.8rem;">
+                    <span id="xp-current">0 XP</span>
+                    <span id="xp-next">1000 XP</span>
+                </div>
+                <div style="height:10px; background:#111; border-radius:20px; overflow:hidden; border:1px solid var(--glass);">
+                    <div id="xp-bar" style="width:0%; height:100%; background:var(--neon-green); box-shadow:0 0 15px var(--neon-green); transition: 0.6s ease-out;"></div>
                 </div>
             </div>
-            <div class="glass-card">
-                <span class="stat-label">Dnešní hydratace</span>
-                <span id="water-stat" class="stat-val">0 ml</span>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="glass-card">
+                    <span class="stat-label">BMI Index</span>
+                    <span id="bmi-val" class="stat-val" style="font-size:1.8rem;">--</span>
+                    <span id="bmi-status" style="font-size:0.6rem; font-weight:bold; color:var(--accent-blue);">NO DATA</span>
+                </div>
+                <div class="glass-card">
+                    <span class="stat-label">BMR (kcal)</span>
+                    <span id="bmr-val" class="stat-val" style="font-size:1.8rem;">--</span>
+                    <span style="font-size:0.6rem; opacity:0.5;">BASAL RATE</span>
+                </div>
             </div>
-            <button class="btn btn-red" onclick="exportData()" style="margin-top: 10px;">
-                <i class="fas fa-file-download"></i> STÁHNOUT REPORT
-            </button>
+
+            <div class="glass-card">
+                <span class="stat-label">Achievements</span>
+                <div id="achievements" style="display:flex; gap:10px; margin-top:10px; font-size:1.5rem;">
+                    <i class="fas fa-award" style="opacity:0.2" title="10k Steps"></i>
+                    <i class="fas fa-tint" style="opacity:0.2" title="3L Water"></i>
+                    <i class="fas fa-fire" style="opacity:0.2" title="7 Day Streak"></i>
+                    <i class="fas fa-trophy" style="opacity:0.2" title="Level 10"></i>
+                </div>
+            </div>
         </div>
 
-        <div id="activity" class="page">
-            <h2 style="margin-left: 5px;">Hydratace</h2>
-            <div class="glass-card" style="text-align: center;">
-                <span class="stat-label">Celkem vypito</span>
-                <div style="font-size: 3rem; margin: 15px 0; font-weight: 900; color: #3498db;">
-                    <span id="water-count">0</span><span style="font-size: 1.2rem; margin-left: 5px;">ml</span>
+        <div id="water" class="page">
+            <h2 style="font-weight:900; letter-spacing:-1px;">Hydration Hub</h2>
+            <div class="glass-card" style="text-align:center;">
+                <div id="water-visual" style="width:180px; height:180px; border-radius:50%; border:6px solid #1a1a1a; margin:20px auto; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                    <div id="water-fill" style="position:absolute; bottom:0; width:100%; background:linear-gradient(transparent, var(--accent-blue)); height:0%; transition:1s cubic-bezier(0.4, 0, 0.2, 1); opacity:0.6;"></div>
+                    <span id="water-display" style="font-size:2.8rem; font-weight:900; z-index:2; position:relative;">0</span>
+                    <span style="font-size:0.8rem; z-index:2; opacity:0.6; font-weight:bold;">ML / 3000</span>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="number" id="water-input" placeholder="Zadej ml..." inputmode="numeric">
-                    <button class="btn" onclick="addCustomWater()" style="flex: 0.6;">PŘIDAT</button>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="water-input" placeholder="Custom ml" inputmode="numeric">
+                    <button class="btn" onclick="addWater('custom')" style="flex:0.6; border-color:var(--accent-blue);">ADD</button>
                 </div>
                 
-                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                    <button class="btn" style="padding: 8px; font-size: 0.7rem; border-color: #333;" onclick="quickWater(250)">+250ml</button>
-                    <button class="btn" style="padding: 8px; font-size: 0.7rem; border-color: #333;" onclick="quickWater(500)">+500ml</button>
-                    <button class="btn" style="padding: 8px; font-size: 0.7rem; border-color: #333;" onclick="quickWater(750)">+750ml</button>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-top:15px;">
+                    <button class="btn" style="padding:10px; font-size:0.7rem;" onclick="addWater(250)">250ml</button>
+                    <button class="btn" style="padding:10px; font-size:0.7rem;" onclick="addWater(500)">500ml</button>
+                    <button class="btn" style="padding:10px; font-size:0.7rem;" onclick="addWater(750)">750ml</button>
                 </div>
             </div>
+        </div>
+
+        <div id="config" class="page">
+            <h2 style="font-weight:900; letter-spacing:-1px;">System Config</h2>
+            <div class="glass-card">
+                <span class="stat-label">Biometrics</span>
+                <input type="text" id="cfg-name" placeholder="User Nickname" onchange="syncSettings()">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <input type="number" id="cfg-height" placeholder="Height (cm)" onchange="syncSettings()">
+                    <input type="number" id="cfg-weight" placeholder="Weight (kg)" onchange="syncSettings()">
+                </div>
+                <input type="number" id="cfg-age" placeholder="Age" onchange="syncSettings()">
+            </div>
+
+            <div class="glass-card">
+                <span class="stat-label">Advanced Tools</span>
+                <button class="btn" onclick="exportJSON()" style="font-size:0.7rem; border-color:#555; margin-bottom:10px;">BACKUP DATA (JSON)</button>
+                <button class="btn btn-red" onclick="resetAll()" style="font-size:0.7rem;">FACTORY RESET</button>
+            </div>
+            <p style="text-align:center; font-size:0.6rem; opacity:0.3;">THRUM v2.5.0 LUVYX | STABLE BUILD</p>
         </div>
     </main>
 
     <nav>
-        <div class="nav-item active" onclick="switchPage('home', this)">
-            <i class="fas fa-home"></i>
-            <span class="nav-label">Domů</span>
-        </div>
-        <div class="nav-item" onclick="switchPage('stats', this)">
-            <i class="fas fa-chart-bar"></i>
-            <span class="nav-label">Stats</span>
-        </div>
-        <div class="nav-item" onclick="switchPage('activity', this)">
-            <i class="fas fa-tint"></i>
-            <span class="nav-label">Voda</span>
-        </div>
-        <div class="nav-item" onclick="haptic(50); alert('Nastavení v další aktualizaci!')">
-            <i class="fas fa-cog"></i>
-            <span class="nav-label">Nastavení</span>
-        </div>
+        <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-th-large"></i><span class="nav-label">Core</span></div>
+        <div class="nav-item" onclick="nav('stats', this)"><i class="fas fa-chart-line"></i><span class="nav-label">Insights</span></div>
+        <div class="nav-item" onclick="nav('water', this)"><i class="fas fa-tint"></i><span class="nav-label">Hydro</span></div>
+        <div class="nav-item" onclick="nav('config', this)"><i class="fas fa-sliders-h"></i><span class="nav-label">Config</span></div>
     </nav>
 
     <script>
-        // --- DATA STATE ---
-        let state = {
-            steps: parseInt(localStorage.getItem('thrum_steps')) || 0,
-            water: parseInt(localStorage.getItem('thrum_water')) || 0,
-            xp: parseInt(localStorage.getItem('thrum_xp')) || 0,
+        // --- MASTER STATE ---
+        let app = {
+            steps: parseInt(localStorage.getItem('th_steps')) || 0,
+            water: parseInt(localStorage.getItem('th_water')) || 0,
+            xp: parseInt(localStorage.getItem('th_xp')) || 0,
+            name: localStorage.getItem('th_name') || 'User_Alpha',
+            height: localStorage.getItem('th_h') || 0,
+            weight: localStorage.getItem('th_w') || 0,
+            age: localStorage.getItem('th_age') || 25,
             lvl: 1
         };
 
-        // --- APP INIT ---
+        // --- APP ENGINE ---
         function initApp() {
             document.getElementById('splash').style.display = 'none';
+            loadSettings();
+            updateUI();
+            initPedometer();
+            updateGreeting();
             haptic(100);
-            updateUI();
-            
-            // Pedometer activation
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission().catch(() => {});
-            }
-            window.addEventListener('devicemotion', handleMotion);
-            
-            // Audio Context Unlock
-            const silent = new AudioContext();
-            silent.resume();
         }
 
-        // --- NAVIGATION ---
-        function switchPage(pageId, el) {
+        function nav(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            haptic(20);
+            haptic(15);
         }
 
-        // --- MOTION LOGIC ---
-        let lastMove = 0;
-        function handleMotion(e) {
-            let acc = e.accelerationIncludingGravity;
-            if(!acc.x) return;
-            let force = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
-            
-            if (force > 13 && (Date.now() - lastMove > 350)) {
-                state.steps++;
-                state.xp += 2;
-                lastMove = Date.now();
-                updateUI();
-                saveData();
-                if (state.steps % 50 === 0) celebration();
+        function initPedometer() {
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', (e) => {
+                    let a = e.accelerationIncludingGravity;
+                    if(!a.x) return;
+                    let force = Math.sqrt(a.x**2 + a.y**2 + a.z**2);
+                    if(force > 13.5) {
+                        app.steps++; app.xp += 1;
+                        if(app.steps % 20 === 0) { updateUI(); save(); }
+                    }
+                });
             }
         }
 
-        // --- WATER LOGIC ---
-        function addCustomWater() {
-            const val = parseInt(document.getElementById('water-input').value);
+        // --- FEATURES ---
+        function addWater(amt) {
+            let val = amt === 'custom' ? parseInt(document.getElementById('water-input').value) : amt;
             if(val > 0) {
-                quickWater(val);
-                document.getElementById('water-input').value = '';
+                app.water += val;
+                app.xp += Math.floor(val/10);
+                haptic([30, 50, 30]);
+                if(val >= 500) flashCelebration();
+                updateUI(); save();
             }
         }
 
-        function quickWater(amt) {
-            state.water += amt;
-            state.xp += Math.floor(amt / 10);
-            updateUI();
-            saveData();
-            haptic([30, 50, 30]);
-            if(amt >= 500) celebration();
-        }
-
-        // --- TIMER LOGIC ---
-        let timerInt; let seconds = 0;
+        let tInt; let time = 0;
         function toggleTimer() {
-            const btn = document.getElementById('timer-btn');
-            if (!timerInt) {
-                timerInt = setInterval(() => {
-                    seconds++;
-                    let m = Math.floor(seconds/60).toString().padStart(2,'0');
-                    let s = (seconds%60).toString().padStart(2,'0');
-                    document.getElementById('timer-display').innerText = `${m}:${s}`;
-                }, 1000);
-                btn.innerText = "PAUZA";
-                haptic(40);
+            const b = document.getElementById('timer-btn');
+            if(!tInt) {
+                tInt = setInterval(() => {
+                    time += 100;
+                    let s = Math.floor(time/1000);
+                    let m = Math.floor(s/60);
+                    let d = (time%1000)/100;
+                    document.getElementById('timer-display').innerText = `${m.toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${d}`;
+                }, 100);
+                b.innerText = 'PAUSE'; haptic(40);
             } else {
-                clearInterval(timerInt); timerInt = null;
-                btn.innerText = "START";
+                clearInterval(tInt); tInt = null;
+                b.innerText = 'RESUME';
+                const lap = document.createElement('div');
+                lap.innerText = `LAP: ${document.getElementById('timer-display').innerText}`;
+                document.getElementById('laps-container').prepend(lap);
             }
         }
 
         function resetTimer() {
-            clearInterval(timerInt); timerInt = null; seconds = 0;
-            document.getElementById('timer-display').innerText = "00:00";
-            document.getElementById('timer-btn').innerText = "START";
-            haptic(100);
+            clearInterval(tInt); tInt = null; time = 0;
+            document.getElementById('timer-display').innerText = "00:00.0";
+            document.getElementById('timer-btn').innerText = 'START';
+            document.getElementById('laps-container').innerHTML = '';
         }
 
-        // --- AI COACH ---
         function generateChallenge() {
-            const challenges = [
-                "Dej 15 dřepů a napij se!",
-                "Drž plank 45 vteřin. Teď!",
-                "Udělej 10 kliků pro extra XP.",
-                "Běhej 1 minutu na místě.",
-                "Vypij 300ml čisté vody."
-            ];
-            const pick = challenges[Math.floor(Math.random()*challenges.length)];
-            document.getElementById('ai-text').innerText = pick;
+            const ch = ["15 Squats now!", "Plank for 45s", "Drink 300ml water", "10 Pushups", "Fast walk 2min"];
+            const p = ch[Math.floor(Math.random()*ch.length)];
+            document.getElementById('ai-text').innerText = p;
             haptic(60);
-            
-            const speech = new SpeechSynthesisUtterance(pick);
-            speech.lang = 'cs-CZ';
-            window.speechSynthesis.speak(speech);
+            const s = new SpeechSynthesisUtterance(p); s.lang = 'en-US';
+            window.speechSynthesis.speak(s);
         }
 
-        // --- UTILS ---
+        // --- SYSTEM ---
         function updateUI() {
-            document.getElementById('step-count').innerText = state.steps;
-            document.getElementById('cal-count').innerText = Math.floor(state.steps * 0.04);
-            document.getElementById('water-count').innerText = state.water;
-            document.getElementById('water-stat').innerText = state.water + " ml";
-            document.getElementById('xp-stat').innerText = state.xp + " XP";
+            document.getElementById('display-name').innerText = app.name;
+            document.getElementById('step-count').innerText = app.steps.toLocaleString();
+            document.getElementById('cal-count').innerText = Math.floor(app.steps * 0.04);
+            document.getElementById('water-display').innerText = app.water;
+            document.getElementById('water-fill').style.height = Math.min(100, (app.water/3000)*100) + "%";
             
-            // Level logic
-            state.lvl = Math.floor(state.xp / 500) + 1;
-            document.getElementById('lvl-num').innerText = state.lvl;
-            document.getElementById('xp-bar').style.width = ((state.xp % 500) / 5) + "%";
+            // Stats logic
+            app.lvl = Math.floor(app.xp / 1000) + 1;
+            let cxp = app.xp % 1000;
+            document.getElementById('lvl-num').innerText = app.lvl;
+            document.getElementById('xp-current').innerText = cxp + " XP";
+            document.getElementById('xp-bar').style.width = (cxp/10) + "%";
+
+            // Biometrics
+            if(app.height > 0 && app.weight > 0) {
+                let bmi = (app.weight / ((app.height/100)**2)).toFixed(1);
+                document.getElementById('bmi-val').innerText = bmi;
+                document.getElementById('bmi-status').innerText = bmi < 18.5 ? 'UNDER' : bmi < 25 ? 'OPTIMAL' : 'HEAVY';
+                // BMR (Mifflin-St Jeor)
+                let bmr = Math.floor((10 * app.weight) + (6.25 * app.height) - (5 * app.age) + 5);
+                document.getElementById('bmr-val').innerText = bmr;
+            }
+
+            // Achievements
+            const achs = document.getElementById('achievements').children;
+            if(app.steps > 10000) achs[0].style.opacity = 1;
+            if(app.water >= 3000) achs[1].style.opacity = 1;
+            if(app.lvl >= 10) achs[3].style.opacity = 1;
         }
 
-        function saveData() {
-            localStorage.setItem('thrum_steps', state.steps);
-            localStorage.setItem('thrum_water', state.water);
-            localStorage.setItem('thrum_xp', state.xp);
+        function syncSettings() {
+            app.name = document.getElementById('cfg-name').value || 'User_Alpha';
+            app.height = document.getElementById('cfg-height').value;
+            app.weight = document.getElementById('cfg-weight').value;
+            app.age = document.getElementById('cfg-age').value;
+            save(); updateUI();
         }
 
-        function haptic(pattern) {
-            if(navigator.vibrate) navigator.vibrate(pattern);
+        function loadSettings() {
+            document.getElementById('cfg-name').value = app.name;
+            document.getElementById('cfg-height').value = app.height;
+            document.getElementById('cfg-weight').value = app.weight;
+            document.getElementById('cfg-age').value = app.age;
         }
 
-        function celebration() {
+        function save() {
+            localStorage.setItem('th_steps', app.steps);
+            localStorage.setItem('th_water', app.water);
+            localStorage.setItem('th_xp', app.xp);
+            localStorage.setItem('th_name', app.name);
+            localStorage.setItem('th_h', app.height);
+            localStorage.setItem('th_w', app.weight);
+            localStorage.setItem('th_age', app.age);
+        }
+
+        function updateGreeting() {
+            const h = new Date().getHours();
+            const g = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening";
+            document.getElementById('greeting').innerText = g;
+        }
+
+        function haptic(p) { if(navigator.vibrate) navigator.vibrate(p); }
+        
+        function flashCelebration() {
             const f = document.getElementById('flash');
             f.style.display = 'block';
-            setTimeout(() => f.style.display = 'none', 150);
-            haptic([100, 50, 100, 50, 100]);
+            setTimeout(() => f.style.display='none', 100);
+            haptic([100, 50, 100]);
         }
 
-        function exportData() {
-            const data = `THRUM LUVYX REPORT\nSteps: ${state.steps}\nWater: ${state.water}ml\nXP: ${state.xp}\nLevel: ${state.lvl}`;
-            const blob = new Blob([data], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'thrum_fitness.txt';
-            a.click();
+        function exportJSON() {
+            const data = JSON.stringify(app);
+            prompt("Copy your backup string:", data);
         }
-    </script>
-</body>
-</html>
+
+        function resetAll() {
+            if(confirm("Factory Reset? All data will be lost.")) {
+                localStorage.clear(); location.reload();
+            }
+  
